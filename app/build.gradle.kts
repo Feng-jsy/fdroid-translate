@@ -77,7 +77,7 @@ android {
     }
     create("full") {
       dimension = "variant"
-      applicationIdSuffix = ".fdroid"
+      applicationIdSuffix = ".translate"
     }
     create("default") { dimension = "release" }
     create("nightly") {
