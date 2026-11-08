@@ -1,7 +1,10 @@
 buildscript {
     repositories {
-        mavenCentral()
-        maven { url 'https://maven.google.com/' }
+        // Aliyun mirrors only: maven.google.com / repo.maven.apache.org are not
+        // reachable on this network and would stall the build for minutes.
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
     }
 }
 plugins {
@@ -20,8 +23,8 @@ plugins {
 }
 allprojects {
     repositories {
-        mavenCentral()
-        maven { url 'https://maven.google.com/' }
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
     }
     ktfmt {
         googleStyle()

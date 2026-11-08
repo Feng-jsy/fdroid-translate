@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,8 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,6 +93,7 @@ fun AboutContent(
       modifier = Modifier.padding(paddingValues).padding(16.dp),
     ) {
       AboutHeader(version)
+      AboutTranslationFeature()
       AboutText()
     }
   }
@@ -109,6 +113,41 @@ private fun AboutHeader(version: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(top = 16.dp).alpha(0.75f),
       )
+    }
+  }
+}
+
+@Composable
+private fun AboutTranslationFeature(modifier: Modifier = Modifier) {
+  ElevatedCard(
+    colors =
+      CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+      ),
+    modifier = modifier.fillMaxWidth(),
+  ) {
+    Column(verticalArrangement = spacedBy(8.dp), modifier = Modifier.padding(16.dp)) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = spacedBy(8.dp),
+      ) {
+        Icon(
+          imageVector = Icons.Default.Translate,
+          contentDescription = null, // the title right next to it describes the feature
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.semantics { hideFromAccessibility() },
+        )
+        Text(
+          text = stringResource(R.string.about_translation_title),
+          style = MaterialTheme.typography.titleMedium,
+        )
+      }
+      SelectionContainer {
+        Text(
+          text = stringResource(R.string.about_translation_text),
+          style = MaterialTheme.typography.bodyMedium,
+        )
+      }
     }
   }
 }

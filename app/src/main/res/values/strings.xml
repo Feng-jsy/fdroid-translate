@@ -272,6 +272,12 @@
     <string name="more">More</string>
     <string name="menu_overflow_description">More options</string>
     <string name="less">Less</string>
+    <string name="translate_description">Translate</string>
+    <string name="show_original">Show original</string>
+    <string name="translating">Translating…</string>
+    <string name="translation_failed_retry">Translation failed, retry</string>
+    <string name="about_translation_title">One-tap translation</string>
+    <string name="about_translation_text">App descriptions and new-version notes are often only available in English. This build adds a Translate button below them: tap it to read the text in your system language, tap again to switch back to the original. Tencent Transmart is tried first, with Google Translate and MyMemory as automatic fallbacks. Translations are cached, so the same text is never requested twice. The button stays hidden when the text already is in your language.</string>
 
     <string name="back">Back</string>
     <!-- This should be exactly the same as the standard word for Cancel throughout Android and apps -->

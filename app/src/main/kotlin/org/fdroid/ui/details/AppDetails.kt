@@ -3,8 +3,11 @@ package org.fdroid.ui.details
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +33,7 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -72,6 +77,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
+import java.util.Locale
 import com.viktormykhailiv.compose.hints.HintProperties
 import com.viktormykhailiv.compose.hints.rememberHint
 import com.viktormykhailiv.compose.hints.rememberHintAnchorState
@@ -88,6 +94,8 @@ import org.fdroid.ui.utils.BigLoadingIndicator
 import org.fdroid.ui.utils.ExpandableSection
 import org.fdroid.ui.utils.HintOverlayContainer
 import org.fdroid.ui.utils.OnboardingPopupCard
+import org.fdroid.ui.utils.TranslateButtonRow
+import org.fdroid.ui.utils.rememberTranslationState
 import org.fdroid.ui.utils.testApp
 
 @Composable
@@ -182,14 +190,19 @@ fun AppDetails(
               style = MaterialTheme.typography.titleMediumEmphasized,
               modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
-            if (item.whatsNew != null)
-              SelectionContainer {
-                Text(
-                  text = item.whatsNew,
-                  modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            val whatsNew = item.whatsNew
+            if (whatsNew != null) {
+              val translationState = rememberTranslationState(whatsNew)
+              Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                SelectionContainer {
+                  Text(text = translationState.displayedText)
+                }
+                TranslateButtonRow(
+                  state = translationState,
+                  modifier = Modifier.fillMaxWidth(),
                 )
               }
-            else if (item.app.changelog != null) {
+            } else if (item.app.changelog != null) {
               Text(
                 text =
                   buildAnnotatedString {
@@ -233,6 +246,24 @@ fun AppDetails(
               mutableStateOf(!allowExpand)
             }
           val htmlDescription = AnnotatedString.fromHtml(description)
+          // One-click translation state. Translated text is plain (HTML is stripped).
+          val targetLanguage =
+            Locale.getDefault().let { if (it.language == "zh") "zh-CN" else it.language }
+          var translatedText by remember(description) { mutableStateOf<String?>(null) }
+          var showingTranslation by rememberSaveable(description) { mutableStateOf(false) }
+          var translating by remember(description) { mutableStateOf(false) }
+          var translationFailed by remember(description) { mutableStateOf(false) }
+          val showTranslateButton =
+            !DescriptionTranslator.isAlreadyInTargetLanguage(
+              htmlDescription.text,
+              targetLanguage,
+            )
+          val displayedDescription =
+            if (showingTranslation && translatedText != null) {
+              AnnotatedString(translatedText!!)
+            } else {
+              htmlDescription
+            }
           Column(
             modifier =
               Modifier.fillMaxWidth()
@@ -242,26 +273,80 @@ fun AppDetails(
           ) {
             SelectionContainer {
               Text(
-                text = htmlDescription,
+                text = displayedDescription,
                 lineHeight = 22.sp,
                 maxLines = if (descriptionExpanded) Int.MAX_VALUE else maxLines,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
               )
             }
-            if (allowExpand) {
-              TextButton(onClick = { descriptionExpanded = !descriptionExpanded }) {
-                Text(
-                  text =
-                    if (descriptionExpanded) {
-                      stringResource(R.string.less)
+            Row(
+              horizontalArrangement = Arrangement.End,
+              modifier = Modifier.fillMaxWidth(),
+            ) {
+              if (showTranslateButton) {
+                TextButton(
+                  enabled = !translating,
+                  onClick = {
+                    if (translatedText != null) {
+                      // translation is cached in state, just toggle
+                      showingTranslation = !showingTranslation
+                      translationFailed = false
                     } else {
-                      stringResource(R.string.more)
-                    },
-                  textAlign = Center,
-                  maxLines = if (descriptionExpanded) Int.MAX_VALUE else 3,
-                  modifier = Modifier.fillMaxWidth(),
-                )
+                      coroutineScope.launch {
+                        translating = true
+                        translationFailed = false
+                        when (
+                          val result =
+                            DescriptionTranslator.translate(
+                              htmlDescription.text,
+                              targetLanguage,
+                            )
+                        ) {
+                          is TranslationResult.Success -> {
+                            translatedText = result.text
+                            showingTranslation = true
+                          }
+                          is TranslationResult.Error -> {
+                            translationFailed = true
+                          }
+                        }
+                        translating = false
+                      }
+                    }
+                  },
+                ) {
+                  if (translating) {
+                    CircularProgressIndicator(
+                      strokeWidth = 2.dp,
+                      modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                  }
+                  Text(
+                    text =
+                      when {
+                        translating -> stringResource(R.string.translating)
+                        translationFailed -> stringResource(R.string.translation_failed_retry)
+                        showingTranslation -> stringResource(R.string.show_original)
+                        else -> stringResource(R.string.translate_description)
+                      }
+                  )
+                }
+              }
+              if (allowExpand) {
+                TextButton(onClick = { descriptionExpanded = !descriptionExpanded }) {
+                  Text(
+                    text =
+                      if (descriptionExpanded) {
+                        stringResource(R.string.less)
+                      } else {
+                        stringResource(R.string.more)
+                      },
+                    textAlign = Center,
+                    maxLines = if (descriptionExpanded) Int.MAX_VALUE else 3,
+                  )
+                }
               }
             }
           }

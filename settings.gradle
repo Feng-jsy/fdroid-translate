@@ -1,8 +1,10 @@
 pluginManagement {
     repositories {
-        mavenCentral()
-        google()
-        gradlePluginPortal()
+        // Aliyun mirrors only: direct Google/Central/Plugin Portal are unreachable
+        // on this network and would stall the build for minutes on timeout.
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
     }
 }
 

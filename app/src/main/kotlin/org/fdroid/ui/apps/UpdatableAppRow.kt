@@ -34,8 +34,10 @@ import org.fdroid.ui.FDroidContent
 import org.fdroid.ui.utils.AsyncShimmerImage
 import org.fdroid.ui.utils.BadgeIcon
 import org.fdroid.ui.utils.ExpandIconArrow
+import org.fdroid.ui.utils.TranslateButtonRow
 import org.fdroid.ui.utils.VersionLine
 import org.fdroid.ui.utils.getPreviewVersion
+import org.fdroid.ui.utils.rememberTranslationState
 
 @Composable
 fun UpdatableAppRow(app: AppUpdateItem, isSelected: Boolean, modifier: Modifier = Modifier) {
@@ -81,12 +83,21 @@ fun UpdatableAppRow(app: AppUpdateItem, isSelected: Boolean, modifier: Modifier 
       visible = isExpanded,
       modifier = Modifier.padding(8.dp).semantics { liveRegion = LiveRegionMode.Polite },
     ) {
-      Card(modifier = Modifier.fillMaxWidth()) {
-        Text(
-          text = app.whatsNew ?: "",
-          style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.padding(8.dp),
-        )
+      val whatsNew = app.whatsNew
+      if (whatsNew != null) {
+        val translationState = rememberTranslationState(whatsNew)
+        Card(modifier = Modifier.fillMaxWidth()) {
+          Column(modifier = Modifier.padding(8.dp)) {
+            Text(
+              text = translationState.displayedText,
+              style = MaterialTheme.typography.bodyMedium,
+            )
+            TranslateButtonRow(
+              state = translationState,
+              modifier = Modifier.fillMaxWidth(),
+            )
+          }
+        }
       }
     }
   }
