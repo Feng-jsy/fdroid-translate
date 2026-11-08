@@ -84,8 +84,10 @@ import org.fdroid.ui.utils.AsyncShimmerImage
 import org.fdroid.ui.utils.InstalledBadge
 import org.fdroid.ui.utils.MeteredConnectionDialog
 import org.fdroid.ui.utils.OfflineBar
+import org.fdroid.ui.utils.TranslateButtonRow
 import org.fdroid.ui.utils.asRelativeTimeString
 import org.fdroid.ui.utils.getRepository
+import org.fdroid.ui.utils.rememberTranslationState
 import org.fdroid.ui.utils.startActivitySafe
 import org.fdroid.ui.utils.testApp
 
@@ -211,12 +213,21 @@ fun AppDetailsHeader(
     }
   }
   // Summary
-  item.summary?.let { summary ->
-    SelectionContainer {
-      Text(
-        text = summary,
-        style = MaterialTheme.typography.bodyLargeEmphasized,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+  val summary = item.summary
+  if (!summary.isNullOrBlank()) {
+    // One-click translation for the one-liner shown right below the app name.
+    val translationState = rememberTranslationState(summary)
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+      SelectionContainer {
+        Text(
+          text = translationState.displayedText,
+          style = MaterialTheme.typography.bodyLargeEmphasized,
+        )
+      }
+      TranslateButtonRow(
+        state = translationState,
+        compact = true,
+        modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
       )
     }
   }

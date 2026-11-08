@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -161,13 +163,25 @@ fun rememberTranslationState(text: String): TranslationState {
   return state
 }
 
-/** The "Translate" / "Show original" button belonging to a [TranslationState]. */
+/**
+ * The "Translate" / "Show original" button belonging to a [TranslationState].
+ *
+ * [compact] trims the horizontal padding, for places where the button sits right below a short
+ * piece of text (like the app summary in the header) instead of a long block.
+ */
 @Composable
-fun TranslateTextButton(state: TranslationState, modifier: Modifier = Modifier) {
+fun TranslateTextButton(
+  state: TranslationState,
+  modifier: Modifier = Modifier,
+  compact: Boolean = false,
+) {
   val scope = rememberCoroutineScope()
   TextButton(
     onClick = { scope.launch { state.toggleTranslation() } },
     enabled = !state.isTranslating,
+    contentPadding =
+      if (compact) PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+      else ButtonDefaults.TextButtonContentPadding,
     modifier = modifier,
   ) {
     if (state.isTranslating) {
@@ -188,9 +202,13 @@ fun TranslateTextButton(state: TranslationState, modifier: Modifier = Modifier) 
 
 /** Right-aligned row holding a [TranslateTextButton], for use below a block of text. */
 @Composable
-fun TranslateButtonRow(state: TranslationState, modifier: Modifier = Modifier) {
+fun TranslateButtonRow(
+  state: TranslationState,
+  modifier: Modifier = Modifier,
+  compact: Boolean = false,
+) {
   if (!state.isTranslatable) return
   Row(horizontalArrangement = Arrangement.End, modifier = modifier) {
-    TranslateTextButton(state)
+    TranslateTextButton(state = state, compact = compact)
   }
 }
