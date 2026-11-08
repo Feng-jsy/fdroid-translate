@@ -53,3 +53,7 @@ captures/
 
 # local signing config with credentials
 keystore.properties
+
+# build archives produced by build-apk.sh
+/builds/
+/fdroid-translate-*.apk
