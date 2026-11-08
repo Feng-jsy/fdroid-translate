@@ -22,6 +22,17 @@ sealed interface TranslationResult {
 }
 
 /**
+ * Which engine to try first. The remaining engines are still used as fallbacks, so a translation
+ * keeps working when the preferred engine is unreachable.
+ */
+enum class TranslationEngine {
+  Auto,
+  Tencent,
+  Google,
+  MyMemory,
+}
+
+/**
  * Translates app descriptions with a three-engine fallback chain:
  *
  * 1. Tencent Transmart - reachable from mainland China without a proxy, no API key,
@@ -50,22 +61,42 @@ object DescriptionTranslator {
 
   /**
    * Translates [text] to [targetLanguage] (BCP-47 code, e.g. "zh-CN", "en").
+   * [engine] picks which engine is tried first; the rest stay as fallbacks.
    * The text is split at paragraph boundaries and sent as a batch where the engine allows it.
    */
-  suspend fun translate(text: String, targetLanguage: String): TranslationResult =
+  suspend fun translate(
+    text: String,
+    targetLanguage: String,
+    engine: TranslationEngine = TranslationEngine.Auto,
+  ): TranslationResult =
     withContext(Dispatchers.IO) {
-      val cacheKey = "$targetLanguage|${text.hashCode()}"
+      val cacheKey = "$targetLanguage|${engine.name}|${text.hashCode()}"
       cache[cacheKey]?.let { return@withContext TranslationResult.Success(it) }
 
       val chunks = splitIntoChunks(text)
       val translated =
-        translateWithTencent(chunks, targetLanguage)
-          ?: translateWithGoogle(chunks, targetLanguage)
-          ?: translateWithMyMemory(chunks, targetLanguage)
-          ?: return@withContext TranslationResult.Error("All translation engines failed")
+        engineOrder(engine).firstNotNullOfOrNull { candidate ->
+          when (candidate) {
+            TranslationEngine.Tencent -> translateWithTencent(chunks, targetLanguage)
+            TranslationEngine.Google -> translateWithGoogle(chunks, targetLanguage)
+            TranslationEngine.MyMemory -> translateWithMyMemory(chunks, targetLanguage)
+            TranslationEngine.Auto -> null
+          }
+        } ?: return@withContext TranslationResult.Error("All translation engines failed")
 
       cache[cacheKey] = translated
       TranslationResult.Success(translated)
+    }
+
+  /** The engines to try, in order, for the user-selected [engine]. */
+  private fun engineOrder(engine: TranslationEngine): List<TranslationEngine> =
+    when (engine) {
+      TranslationEngine.Auto, TranslationEngine.Tencent ->
+        listOf(TranslationEngine.Tencent, TranslationEngine.Google, TranslationEngine.MyMemory)
+      TranslationEngine.Google ->
+        listOf(TranslationEngine.Google, TranslationEngine.Tencent, TranslationEngine.MyMemory)
+      TranslationEngine.MyMemory ->
+        listOf(TranslationEngine.MyMemory, TranslationEngine.Tencent, TranslationEngine.Google)
     }
 
   /** Tencent Transmart: POSTs all chunks at once and gets them back in order. */

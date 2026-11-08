@@ -27,6 +27,16 @@
     <string name="show_original">顯示原文</string>
     <string name="translating">翻譯中…</string>
     <string name="translation_failed_retry">翻譯失敗，點擊重試</string>
+    <string name="pref_category_translation">翻譯</string>
+    <string name="pref_translation_enabled_title">一鍵翻譯</string>
+    <string name="pref_translation_enabled_summary">在應用介紹和新版本變化下方顯示「翻譯」按鈕</string>
+    <string name="pref_translation_auto_title">自動翻譯</string>
+    <string name="pref_translation_auto_summary">開啟介紹或更新說明時立即翻譯</string>
+    <string name="pref_translation_engine_title">首選引擎</string>
+    <string name="pref_translation_engine_auto">自動（推薦）</string>
+    <string name="pref_translation_engine_tencent">騰訊互動翻譯</string>
+    <string name="pref_translation_engine_google">Google 翻譯</string>
+    <string name="pref_translation_engine_mymemory">MyMemory</string>
     <string name="about_translation_title">一鍵翻譯</string>
     <string name="about_translation_text">許多應用介紹和「新版本變化」只有英文。本版在它們下方增加了「翻譯」按鈕：點一下即按系統語言顯示譯文，再點一下切回原文。翻譯優先使用騰訊互動翻譯，失敗時自動改用 Google 翻譯和 MyMemory。譯文會被快取，同一段文字不會重複請求。文字本身已是系統語言時不顯示該按鈕。</string>
     <string name="back">返回</string>

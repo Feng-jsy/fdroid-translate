@@ -48,6 +48,16 @@
     <string name="show_original">显示原文</string>
     <string name="translating">翻译中…</string>
     <string name="translation_failed_retry">翻译失败，点击重试</string>
+    <string name="pref_category_translation">翻译</string>
+    <string name="pref_translation_enabled_title">一键翻译</string>
+    <string name="pref_translation_enabled_summary">在应用介绍和新版本变化下方显示「翻译」按钮</string>
+    <string name="pref_translation_auto_title">自动翻译</string>
+    <string name="pref_translation_auto_summary">打开介绍或更新说明时立即翻译</string>
+    <string name="pref_translation_engine_title">首选引擎</string>
+    <string name="pref_translation_engine_auto">自动（推荐）</string>
+    <string name="pref_translation_engine_tencent">腾讯交互翻译</string>
+    <string name="pref_translation_engine_google">Google 翻译</string>
+    <string name="pref_translation_engine_mymemory">MyMemory</string>
     <string name="about_translation_title">一键翻译</string>
     <string name="about_translation_text">很多应用介绍和「新版本变化」只有英文。本版在它们下方增加了「翻译」按钮：点一下即按系统语言显示译文，再点一下切回原文。翻译优先使用腾讯交互翻译，失败时自动改用 Google 翻译和 MyMemory。译文会被缓存，同一段文字不会重复请求。文字本身已是系统语言时不显示该按钮。</string>
     <string name="back">返回</string>

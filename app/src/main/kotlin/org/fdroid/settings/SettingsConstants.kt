@@ -44,6 +44,25 @@ object SettingsConstants {
   const val PREF_KEY_MIRROR_CHOOSER = "mirrorChooser"
   val PREF_DEFAULT_MIRROR_CHOOSER = MirrorChooserValues.Random.name
 
+  /** Whether the one-tap translation buttons are shown at all. */
+  const val PREF_KEY_TRANSLATION_ENABLED = "translationEnabled"
+  const val PREF_DEFAULT_TRANSLATION_ENABLED = true
+
+  /** Whether descriptions and update notes get translated automatically when shown. */
+  const val PREF_KEY_TRANSLATION_AUTO = "translationAuto"
+  const val PREF_DEFAULT_TRANSLATION_AUTO = false
+
+  /** Engine tried first; the others remain as fallbacks. */
+  const val PREF_KEY_TRANSLATION_ENGINE = "translationEngine"
+  val PREF_DEFAULT_TRANSLATION_ENGINE = TranslationEngineValues.Auto.name
+
+  enum class TranslationEngineValues {
+    Auto,
+    Tencent,
+    Google,
+    MyMemory,
+  }
+
   const val PREF_KEY_PROXY = "proxy"
   const val PREF_DEFAULT_PROXY = ""
 

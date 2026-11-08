@@ -1,3 +1,4 @@
+import java.util.Properties
 import javax.xml.parsers.DocumentBuilderFactory
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -14,6 +15,25 @@ plugins {
 android {
   namespace = "org.fdroid"
   compileSdk = libs.versions.compileSdk.get().toInt()
+
+  // Local-only signing setup. Without keystore.properties the release build stays unsigned,
+  // which is what upstream does for F-Droid's reproducible builds.
+  val keystorePropertiesFile = rootProject.file("keystore.properties")
+  val keystoreProperties = Properties()
+  if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+  }
+
+  signingConfigs {
+    if (keystorePropertiesFile.exists()) {
+      create("localRelease") {
+        storeFile = file(keystoreProperties.getProperty("storeFile"))
+        storePassword = keystoreProperties.getProperty("storePassword")
+        keyAlias = keystoreProperties.getProperty("keyAlias")
+        keyPassword = keystoreProperties.getProperty("keyPassword")
+      }
+    }
+  }
 
   defaultConfig {
     applicationId = "org.fdroid"
@@ -41,6 +61,7 @@ android {
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+      if (keystorePropertiesFile.exists()) signingConfig = signingConfigs.getByName("localRelease")
     }
     getByName("debug") {
       applicationIdSuffix = ".debug"

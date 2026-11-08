@@ -276,6 +276,16 @@
     <string name="show_original">Show original</string>
     <string name="translating">Translating…</string>
     <string name="translation_failed_retry">Translation failed, retry</string>
+    <string name="pref_category_translation">Translation</string>
+    <string name="pref_translation_enabled_title">One-tap translation</string>
+    <string name="pref_translation_enabled_summary">Show a Translate button below app descriptions and update notes</string>
+    <string name="pref_translation_auto_title">Translate automatically</string>
+    <string name="pref_translation_auto_summary">Translate as soon as a description or update note is shown</string>
+    <string name="pref_translation_engine_title">Preferred engine</string>
+    <string name="pref_translation_engine_auto">Automatic (recommended)</string>
+    <string name="pref_translation_engine_tencent">Tencent Transmart</string>
+    <string name="pref_translation_engine_google">Google Translate</string>
+    <string name="pref_translation_engine_mymemory">MyMemory</string>
     <string name="about_translation_title">One-tap translation</string>
     <string name="about_translation_text">App descriptions and new-version notes are often only available in English. This build adds a Translate button below them: tap it to read the text in your system language, tap again to switch back to the original. Tencent Transmart is tried first, with Google Translate and MyMemory as automatic fallbacks. Translations are cached, so the same text is never requested twice. The button stays hidden when the text already is in your language.</string>
 

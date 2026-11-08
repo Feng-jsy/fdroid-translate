@@ -50,3 +50,6 @@ captures/
 
 /fdroid/
 /screenshots
+
+# local signing config with credentials
+keystore.properties

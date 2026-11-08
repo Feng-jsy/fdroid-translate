@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -77,7 +74,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
-import java.util.Locale
 import com.viktormykhailiv.compose.hints.HintProperties
 import com.viktormykhailiv.compose.hints.rememberHint
 import com.viktormykhailiv.compose.hints.rememberHintAnchorState
@@ -95,6 +91,7 @@ import org.fdroid.ui.utils.ExpandableSection
 import org.fdroid.ui.utils.HintOverlayContainer
 import org.fdroid.ui.utils.OnboardingPopupCard
 import org.fdroid.ui.utils.TranslateButtonRow
+import org.fdroid.ui.utils.TranslateTextButton
 import org.fdroid.ui.utils.rememberTranslationState
 import org.fdroid.ui.utils.testApp
 
@@ -247,20 +244,10 @@ fun AppDetails(
             }
           val htmlDescription = AnnotatedString.fromHtml(description)
           // One-click translation state. Translated text is plain (HTML is stripped).
-          val targetLanguage =
-            Locale.getDefault().let { if (it.language == "zh") "zh-CN" else it.language }
-          var translatedText by remember(description) { mutableStateOf<String?>(null) }
-          var showingTranslation by rememberSaveable(description) { mutableStateOf(false) }
-          var translating by remember(description) { mutableStateOf(false) }
-          var translationFailed by remember(description) { mutableStateOf(false) }
-          val showTranslateButton =
-            !DescriptionTranslator.isAlreadyInTargetLanguage(
-              htmlDescription.text,
-              targetLanguage,
-            )
+          val translationState = rememberTranslationState(htmlDescription.text)
           val displayedDescription =
-            if (showingTranslation && translatedText != null) {
-              AnnotatedString(translatedText!!)
+            if (translationState.isShowingTranslation && translationState.translatedText != null) {
+              AnnotatedString(translationState.translatedText!!)
             } else {
               htmlDescription
             }
@@ -284,55 +271,8 @@ fun AppDetails(
               horizontalArrangement = Arrangement.End,
               modifier = Modifier.fillMaxWidth(),
             ) {
-              if (showTranslateButton) {
-                TextButton(
-                  enabled = !translating,
-                  onClick = {
-                    if (translatedText != null) {
-                      // translation is cached in state, just toggle
-                      showingTranslation = !showingTranslation
-                      translationFailed = false
-                    } else {
-                      coroutineScope.launch {
-                        translating = true
-                        translationFailed = false
-                        when (
-                          val result =
-                            DescriptionTranslator.translate(
-                              htmlDescription.text,
-                              targetLanguage,
-                            )
-                        ) {
-                          is TranslationResult.Success -> {
-                            translatedText = result.text
-                            showingTranslation = true
-                          }
-                          is TranslationResult.Error -> {
-                            translationFailed = true
-                          }
-                        }
-                        translating = false
-                      }
-                    }
-                  },
-                ) {
-                  if (translating) {
-                    CircularProgressIndicator(
-                      strokeWidth = 2.dp,
-                      modifier = Modifier.size(16.dp),
-                    )
-                    Spacer(Modifier.size(8.dp))
-                  }
-                  Text(
-                    text =
-                      when {
-                        translating -> stringResource(R.string.translating)
-                        translationFailed -> stringResource(R.string.translation_failed_retry)
-                        showingTranslation -> stringResource(R.string.show_original)
-                        else -> stringResource(R.string.translate_description)
-                      }
-                  )
-                }
+              if (translationState.isTranslatable) {
+                TranslateTextButton(translationState)
               }
               if (allowExpand) {
                 TextButton(onClick = { descriptionExpanded = !descriptionExpanded }) {

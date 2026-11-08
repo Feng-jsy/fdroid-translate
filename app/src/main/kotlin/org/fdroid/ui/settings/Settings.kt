@@ -10,13 +10,16 @@ import android.widget.Toast
 import android.widget.Toast.LENGTH_SHORT
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Android
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Lan
@@ -83,6 +86,13 @@ import org.fdroid.settings.SettingsConstants.PREF_KEY_PREVENT_SCREENSHOTS
 import org.fdroid.settings.SettingsConstants.PREF_KEY_PROXY
 import org.fdroid.settings.SettingsConstants.PREF_KEY_REPO_AUTO_UPDATES
 import org.fdroid.settings.SettingsConstants.PREF_KEY_THEME
+import org.fdroid.settings.SettingsConstants.PREF_KEY_TRANSLATION_AUTO
+import org.fdroid.settings.SettingsConstants.PREF_KEY_TRANSLATION_ENABLED
+import org.fdroid.settings.SettingsConstants.PREF_KEY_TRANSLATION_ENGINE
+import org.fdroid.settings.SettingsConstants.PREF_DEFAULT_TRANSLATION_AUTO
+import org.fdroid.settings.SettingsConstants.PREF_DEFAULT_TRANSLATION_ENABLED
+import org.fdroid.settings.SettingsConstants.PREF_DEFAULT_TRANSLATION_ENGINE
+import org.fdroid.settings.SettingsConstants.TranslationEngineValues
 import org.fdroid.settings.SettingsConstants.PREF_USE_DNS_CACHE
 import org.fdroid.settings.SettingsConstants.PREF_USE_DNS_CACHE_DEFAULT
 import org.fdroid.settings.toAutoUpdateValue
@@ -216,6 +226,51 @@ fun Settings(
           title = { Text(stringResource(R.string.icon_title)) },
           summary = { Text(stringResource(R.string.icon_summary)) },
           onClick = { showAppIconDialog = true },
+        )
+        preferenceCategory(
+          key = "pref_category_translation",
+          title = { Text(stringResource(R.string.pref_category_translation)) },
+        )
+        switchPreference(
+          key = PREF_KEY_TRANSLATION_ENABLED,
+          defaultValue = PREF_DEFAULT_TRANSLATION_ENABLED,
+          title = { Text(stringResource(R.string.pref_translation_enabled_title)) },
+          icon = {
+            Icon(
+              imageVector = Icons.Default.Translate,
+              contentDescription = null,
+              modifier = Modifier.semantics { hideFromAccessibility() },
+            )
+          },
+          summary = { Text(stringResource(R.string.pref_translation_enabled_summary)) },
+        )
+        switchPreference(
+          key = PREF_KEY_TRANSLATION_AUTO,
+          defaultValue = PREF_DEFAULT_TRANSLATION_AUTO,
+          title = { Text(stringResource(R.string.pref_translation_auto_title)) },
+          icon = {
+            Icon(
+              imageVector = Icons.Default.AutoAwesome,
+              contentDescription = null,
+              modifier = Modifier.semantics { hideFromAccessibility() },
+            )
+          },
+          summary = { Text(stringResource(R.string.pref_translation_auto_summary)) },
+        )
+        listPreference(
+          key = PREF_KEY_TRANSLATION_ENGINE,
+          defaultValue = PREF_DEFAULT_TRANSLATION_ENGINE,
+          title = { Text(stringResource(R.string.pref_translation_engine_title)) },
+          icon = {
+            Icon(
+              imageVector = Icons.Default.Cloud,
+              contentDescription = null,
+              modifier = Modifier.semantics { hideFromAccessibility() },
+            )
+          },
+          summary = { strValue -> Text(stringResource(engineLabelRes(strValue))) },
+          values = TranslationEngineValues.entries.map { it.name },
+          valueToText = { strValue -> AnnotatedString(res.getString(engineLabelRes(strValue))) },
         )
         preferenceCategory(
           key = "pref_category_updates",
@@ -442,6 +497,15 @@ fun Settings(
       )
   }
 }
+
+@StringRes
+private fun engineLabelRes(value: String): Int =
+  when (value) {
+    TranslationEngineValues.Tencent.name -> R.string.pref_translation_engine_tencent
+    TranslationEngineValues.Google.name -> R.string.pref_translation_engine_google
+    TranslationEngineValues.MyMemory.name -> R.string.pref_translation_engine_mymemory
+    else -> R.string.pref_translation_engine_auto
+  }
 
 @Preview
 @Composable
